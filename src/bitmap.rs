@@ -26,6 +26,10 @@ impl Bitmap {
     /// Adds the integer `n` to the bitmap.
     pub fn set(&mut self, n: usize) {
         let bucket = n / BITS_PER_BUCKET;
+        let num = self.num_buckets();
+        if bucket >= num {
+            self.buckets.extend(&vec![0; bucket - num + 1]);
+        }
         let pos = n % BITS_PER_BUCKET;
         self.buckets[bucket] |= 1 << pos;
     }
@@ -34,6 +38,9 @@ impl Bitmap {
     /// Returns whether the integer `n` is in the bitmap.
     pub fn get(&self, n: usize) -> bool {
         let bucket = n / BITS_PER_BUCKET;
+        if bucket >= self.num_buckets() {
+            return false;
+        }
         let pos = n % BITS_PER_BUCKET;
         return 0 != self.buckets[bucket] & (1 << pos);
     }

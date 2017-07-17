@@ -16,14 +16,22 @@ fn main() {
     odds.set(7);
     odds.set(9);
 
+    println!("Union");
     let union = primes.union(&odds);
     for i in 0 .. 10 {
         println!("{}: {}", i, union.get(i));
     }
 
+    println!("Intersection");
     let inter = primes.intersection(&odds);
     for i in 0 .. 10 {
         println!("{}: {}", i, inter.get(i));
     }
 
+    println!("Out of range");
+    let mut oor = Bitmap::with_capacity(1);
+    let n = 64;
+    println!("{}: {}", n, oor.get(n));
+    oor.set(n);
+    println!("{}: {}", n, oor.get(n));
 }
