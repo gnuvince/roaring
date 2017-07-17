@@ -1,11 +1,12 @@
 use std::cmp;
+use std::convert::From;
 
 const DEFAULT_CAPACITY: usize = 4;
 const BITS_PER_BUCKET: usize = 64;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Bitmap {
-    buckets: Vec<usize>,
+    buckets: Vec<u64>,
 }
 
 
@@ -35,7 +36,17 @@ impl Bitmap {
     }
 
 
-    /// Returns whether the integer `n` is in the bitmap.
+    /// Removes the integer `n` from the bitmap.
+    pub fn unset(&mut self, n: usize) {
+        let bucket = n / BITS_PER_BUCKET;
+        if bucket < self.num_buckets() {
+            let pos = n % BITS_PER_BUCKET;
+            self.buckets[bucket] &= !(1 << pos);
+        }
+    }
+
+
+    /// Checks if the integer `n` is in the bitmap.
     pub fn get(&self, n: usize) -> bool {
         let bucket = n / BITS_PER_BUCKET;
         if bucket >= self.num_buckets() {
@@ -72,8 +83,25 @@ impl Bitmap {
     }
 
 
+    /// Returns the number of integers in the bitmap.
+    pub fn count(&self) -> usize {
+        return self.buckets.iter()
+            .map(|x| x.count_ones() as usize)
+            .sum();
+    }
+
+
     // private
     fn num_buckets(&self) -> usize {
         return self.buckets.len();
+    }
+}
+
+
+impl <'a> From<&'a [usize]> for Bitmap {
+    fn from(xs: &'a [usize]) -> Bitmap {
+        let mut bm = Bitmap::new();
+        for x in xs { bm.set(*x); }
+        return bm;
     }
 }

@@ -16,14 +16,14 @@ fn main() {
     odds.set(7);
     odds.set(9);
 
-    println!("Union");
     let union = primes.union(&odds);
+    println!("Union ({})", union.count());
     for i in 0 .. 10 {
         println!("{}: {}", i, union.get(i));
     }
 
-    println!("Intersection");
     let inter = primes.intersection(&odds);
+    println!("Intersection ({})", inter.count());
     for i in 0 .. 10 {
         println!("{}: {}", i, inter.get(i));
     }
@@ -34,4 +34,12 @@ fn main() {
     println!("{}: {}", n, oor.get(n));
     oor.set(n);
     println!("{}: {}", n, oor.get(n));
+    oor.unset(n);
+    println!("{}: {}", n, oor.get(n));
+
+    println!("From");
+    let bm = Bitmap::from(&[2, 4, 6, 8][..]);
+    for i in 0 .. 10 {
+        println!("{}: {}", i, bm.get(i));
+    }
 }
