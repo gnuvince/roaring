@@ -70,6 +70,7 @@ impl Bitmap {
         return union_bm;
     }
 
+
     /// Computes and returns a new bitmap containing
     /// all the integers in `self` and in `other`.
     pub fn intersection(&self, other: &Bitmap) -> Bitmap {
@@ -80,6 +81,19 @@ impl Bitmap {
             *b = self.buckets[i] & other.buckets[i];
         }
         return inter_bm;
+    }
+
+
+    /// Creates a new set where the elements from the
+    /// bitmap on the right have been removed from the
+    /// set on the right.
+    pub fn difference(&self, other: &Bitmap) -> Bitmap {
+        let n = cmp::min(self.num_buckets(), other.num_buckets());
+        let mut diff_bm = self.clone();
+        for (i, b) in (0 .. n).zip(diff_bm.buckets.iter_mut()) {
+            *b &= !other.buckets[i];
+        }
+        return diff_bm;
     }
 
 

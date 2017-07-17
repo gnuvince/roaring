@@ -56,3 +56,25 @@ fn test_intersection() {
     assert!(u.get(7));
     assert!(!u.get(9));
 }
+
+
+#[test]
+fn test_difference() {
+    let primes = Bitmap::from(&[2, 3, 5, 7][..]);
+    let odds = Bitmap::from(&[1, 3, 5, 7, 9][..]);
+    let diff1 = primes.difference(&odds);
+    assert_eq!(1, diff1.count());
+    assert!(diff1.get(2));
+    assert!(!diff1.get(3));
+    assert!(!diff1.get(5));
+    assert!(!diff1.get(7));
+
+    let diff2 = odds.difference(&primes);
+    assert_eq!(2, diff2.count());
+    assert!(diff2.get(1));
+    assert!(!diff2.get(2));
+    assert!(!diff2.get(3));
+    assert!(!diff2.get(5));
+    assert!(!diff2.get(7));
+    assert!(diff2.get(9));
+}
