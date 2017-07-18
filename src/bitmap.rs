@@ -97,6 +97,18 @@ impl Bitmap {
     }
 
 
+    /// Returns the complement of a bitmap.  Only the
+    /// bits present in the buckets are flipped: no new
+    /// integers are added to the set.
+    pub fn complement(&self) -> Bitmap {
+        let mut compl_bm = self.clone();
+        for b in compl_bm.buckets.iter_mut() {
+            *b = !*b;
+        }
+        return compl_bm;
+    }
+
+
     /// Returns the number of integers in the bitmap.
     pub fn count(&self) -> usize {
         return self.buckets.iter()
