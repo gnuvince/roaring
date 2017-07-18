@@ -30,8 +30,8 @@ fn test_set_unset_get() {
 
 #[test]
 fn test_union() {
-    let primes = Bitmap::from(&[2, 3, 5, 7][..]);
-    let odds = Bitmap::from(&[1, 3, 5, 7, 9][..]);
+    let primes = Bitmap::from(&[2, 3, 5, 7]);
+    let odds = Bitmap::from(&[1, 3, 5, 7, 9]);
     let u = primes.union(&odds);
     assert_eq!(6, u.count());
     assert!(u.get(1));
@@ -45,8 +45,8 @@ fn test_union() {
 
 #[test]
 fn test_intersection() {
-    let primes = Bitmap::from(&[2, 3, 5, 7][..]);
-    let odds = Bitmap::from(&[1, 3, 5, 7, 9][..]);
+    let primes = Bitmap::from(&[2, 3, 5, 7]);
+    let odds = Bitmap::from(&[1, 3, 5, 7, 9]);
     let u = primes.intersection(&odds);
     assert_eq!(3, u.count());
     assert!(!u.get(1));
@@ -60,8 +60,8 @@ fn test_intersection() {
 
 #[test]
 fn test_difference() {
-    let primes = Bitmap::from(&[2, 3, 5, 7][..]);
-    let odds = Bitmap::from(&[1, 3, 5, 7, 9][..]);
+    let primes = Bitmap::from(&[2, 3, 5, 7]);
+    let odds = Bitmap::from(&[1, 3, 5, 7, 9]);
     let diff1 = primes.difference(&odds);
     assert_eq!(1, diff1.count());
     assert!(diff1.get(2));
@@ -77,4 +77,18 @@ fn test_difference() {
     assert!(!diff2.get(5));
     assert!(!diff2.get(7));
     assert!(diff2.get(9));
+}
+
+
+#[test]
+fn test_complement() {
+    let primes = vec![
+        2, 3, 5, 7, 11, 13, 17, 19, 23, 29,
+        31, 37, 41, 43, 47, 53, 57, 59, 61
+    ];
+    let primes_bm = Bitmap::from(&primes);
+    let composites_bm = primes_bm.complement();
+    for p in primes.iter() {
+        assert!(!composites_bm.get(*p));
+    }
 }

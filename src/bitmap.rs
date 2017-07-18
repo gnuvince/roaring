@@ -1,5 +1,5 @@
 use std::cmp;
-use std::convert::From;
+use std::convert::{AsRef, From};
 
 const DEFAULT_CAPACITY: usize = 4;
 const BITS_PER_BUCKET: usize = 64;
@@ -124,10 +124,12 @@ impl Bitmap {
 }
 
 
-impl <'a> From<&'a [usize]> for Bitmap {
-    fn from(xs: &'a [usize]) -> Bitmap {
+impl <T: AsRef<[usize]>> From<T> for Bitmap {
+    fn from(elems: T) -> Bitmap {
         let mut bm = Bitmap::new();
-        for x in xs { bm.set(*x); }
+        for x in elems.as_ref() {
+            bm.set(*x);
+        }
         return bm;
     }
 }
