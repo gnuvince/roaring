@@ -92,3 +92,30 @@ fn test_complement() {
         assert!(!composites_bm.get(*p));
     }
 }
+
+
+#[test]
+fn test_iter_empty() {
+    let empty_bm = Bitmap::new();
+    let mut bm_iter = empty_bm.into_iter();
+    assert_eq!(None, bm_iter.next());
+
+    let mut empty_bm = Bitmap::new();
+    empty_bm.compact();
+    let mut bm_iter = empty_bm.into_iter();
+    assert_eq!(None, bm_iter.next());
+}
+
+
+#[test]
+fn test_iter() {
+    let bm = Bitmap::from(&[2, 3, 5, 7, 131]);
+    let mut bm_iter = bm.into_iter();
+    assert_eq!(Some(2), bm_iter.next());
+    assert_eq!(Some(3), bm_iter.next());
+    assert_eq!(Some(5), bm_iter.next());
+    assert_eq!(Some(7), bm_iter.next());
+    assert_eq!(Some(131), bm_iter.next());
+    assert_eq!(None, bm_iter.next());
+    assert_eq!(None, bm_iter.next());
+}
