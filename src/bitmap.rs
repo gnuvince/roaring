@@ -129,7 +129,21 @@ impl Bitmap {
     }
 
 
-    // private
+    /// Removes the unnecessary buckets, i.e., the ones
+    /// at the end of the vector that are zero. Stop at
+    /// the first non-zero bucket or when all buckets
+    /// have been removed.
+    pub fn compact(&mut self) {
+        while !self.buckets.is_empty() {
+            if self.buckets[self.buckets.len() - 1] == 0 {
+                self.buckets.pop();
+            } else {
+                break;
+            }
+        }
+    }
+
+
     fn num_buckets(&self) -> usize {
         return self.buckets.len();
     }
@@ -146,4 +160,21 @@ impl <T> From<T> for Bitmap
         }
         return bm;
     }
+}
+
+
+#[test]
+fn test_compact() {
+    let mut bm = Bitmap::new();
+    assert_eq!(4, bm.num_buckets());
+    bm.compact();
+    assert_eq!(0, bm.num_buckets());
+    bm.set(0);
+    bm.set(128);
+    assert_eq!(3, bm.num_buckets());
+    bm.compact();
+    assert_eq!(3, bm.num_buckets());
+    bm.unset(128);
+    bm.compact();
+    assert_eq!(1, bm.num_buckets());
 }
