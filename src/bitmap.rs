@@ -144,7 +144,7 @@ impl Bitmap {
     }
 
 
-    fn num_buckets(&self) -> usize {
+    pub fn num_buckets(&self) -> usize {
         return self.buckets.len();
     }
 }
