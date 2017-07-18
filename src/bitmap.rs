@@ -1,9 +1,22 @@
 use std::cmp;
 use std::convert::{AsRef, From};
 
+
 const DEFAULT_CAPACITY: usize = 4;
 const BITS_PER_BUCKET: usize = 64;
 
+
+/// A bitmap implementation.
+///
+/// An efficient set implementation making use of
+/// bit-level parallelism to improve the performance
+/// of aggregate operations. It supports the following
+/// operations:
+///
+/// - Adding/removing an integer;
+/// - Querying for membership;
+/// - Performing the union, intersection, difference, and complement;
+/// - Querying the number of members.
 #[derive(Debug, Clone)]
 pub struct Bitmap {
     buckets: Vec<u64>,
@@ -57,8 +70,7 @@ impl Bitmap {
     }
 
 
-    /// Computes and returns a new bitmap containing
-    /// all the integers in `self` or in `other`.
+    /// Returns the set union of two bitmaps.
     pub fn union(&self, other: &Bitmap) -> Bitmap {
         let n1 = self.num_buckets();
         let n2 = other.num_buckets();
@@ -71,8 +83,7 @@ impl Bitmap {
     }
 
 
-    /// Computes and returns a new bitmap containing
-    /// all the integers in `self` and in `other`.
+    /// Returns the set intersection of two bitmaps.
     pub fn intersection(&self, other: &Bitmap) -> Bitmap {
         let n1 = self.num_buckets();
         let n2 = other.num_buckets();
@@ -84,9 +95,10 @@ impl Bitmap {
     }
 
 
-    /// Creates a new set where the elements from the
-    /// bitmap on the right have been removed from the
-    /// set on the right.
+    /// Returns the difference between two sets;
+    /// an integer `n` is included in the result
+    /// if it is present in the set of the left,
+    /// but not in the set on the right.
     pub fn difference(&self, other: &Bitmap) -> Bitmap {
         let n = cmp::min(self.num_buckets(), other.num_buckets());
         let mut diff_bm = self.clone();
@@ -124,7 +136,9 @@ impl Bitmap {
 }
 
 
-impl <T: AsRef<[usize]>> From<T> for Bitmap {
+impl <T> From<T> for Bitmap
+    where T: AsRef<[usize]>
+{
     fn from(elems: T) -> Bitmap {
         let mut bm = Bitmap::new();
         for x in elems.as_ref() {
