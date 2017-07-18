@@ -163,6 +163,56 @@ impl <T> From<T> for Bitmap
 }
 
 
+impl IntoIterator for Bitmap {
+    type Item = usize;
+    type IntoIter = BitmapIterator;
+    fn into_iter(self) -> Self::IntoIter {
+        BitmapIterator {
+            curr_bit: 0,
+            curr_bucket: 0,
+            bitmap: self
+        }
+    }
+}
+
+
+pub struct BitmapIterator {
+    curr_bit: usize,
+    curr_bucket: usize,
+    bitmap: Bitmap,
+}
+
+
+impl Iterator for BitmapIterator {
+    type Item = usize;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            if self.curr_bucket >= self.bitmap.num_buckets() {
+                return None;
+            }
+
+            if self.bitmap.buckets[self.curr_bucket] == 0 ||
+                self.curr_bit >= BITS_PER_BUCKET
+            {
+                self.curr_bucket += 1;
+                self.curr_bit = 0;
+                continue;
+            }
+
+            if self.bitmap.buckets[self.curr_bucket] & (1 << self.curr_bit) == 0 {
+                self.curr_bit += 1;
+                continue;
+            }
+
+            let x = self.curr_bucket * BITS_PER_BUCKET + self.curr_bit;
+            self.curr_bit += 1;
+            return Some(x);
+        }
+    }
+}
+
+
 #[test]
 fn test_compact() {
     let mut bm = Bitmap::new();
