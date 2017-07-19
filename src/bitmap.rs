@@ -167,18 +167,13 @@ impl IntoIterator for Bitmap {
     type Item = usize;
     type IntoIter = BitmapIterator;
     fn into_iter(self) -> Self::IntoIter {
-        BitmapIterator {
-            curr_bit: 0,
-            curr_bucket: 0,
-            bitmap: self
-        }
+        return BitmapIterator { offset: 0, bitmap: self };
     }
 }
 
 
 pub struct BitmapIterator {
-    curr_bit: usize,
-    curr_bucket: usize,
+    offset: usize,
     bitmap: Bitmap,
 }
 
@@ -188,25 +183,26 @@ impl Iterator for BitmapIterator {
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
-            if self.curr_bucket >= self.bitmap.num_buckets() {
+            let bucket = self.offset / BITS_PER_BUCKET;
+            let bit_pos = self.offset % BITS_PER_BUCKET;
+
+            if bucket >= self.bitmap.num_buckets() {
                 return None;
             }
 
-            if self.bitmap.buckets[self.curr_bucket] == 0 ||
-                self.curr_bit >= BITS_PER_BUCKET
-            {
-                self.curr_bucket += 1;
-                self.curr_bit = 0;
+            // Optimization: skip whole bucket when its value is zero.
+            if self.bitmap.buckets[bucket] == 0 {
+                self.offset += 64;
                 continue;
             }
 
-            if self.bitmap.buckets[self.curr_bucket] & (1 << self.curr_bit) == 0 {
-                self.curr_bit += 1;
+            if self.bitmap.buckets[bucket] & (1 << bit_pos) == 0 {
+                self.offset += 1;
                 continue;
             }
 
-            let x = self.curr_bucket * BITS_PER_BUCKET + self.curr_bit;
-            self.curr_bit += 1;
+            let x = self.offset;
+            self.offset += 1;
             return Some(x);
         }
     }
