@@ -38,34 +38,34 @@ impl Bitmap {
 
 
     /// Adds the integer `n` to the bitmap.
-    pub fn set(&mut self, n: usize) {
-        let bucket = n / BITS_PER_BUCKET;
+    pub fn set(&mut self, n: i32) {
+        let bucket = n as usize / BITS_PER_BUCKET;
         let num = self.num_buckets();
         if bucket >= num {
             self.buckets.extend(&vec![0; bucket - num + 1]);
         }
-        let pos = n % BITS_PER_BUCKET;
+        let pos = n as usize % BITS_PER_BUCKET;
         self.buckets[bucket] |= 1 << pos;
     }
 
 
     /// Removes the integer `n` from the bitmap.
-    pub fn unset(&mut self, n: usize) {
-        let bucket = n / BITS_PER_BUCKET;
+    pub fn unset(&mut self, n: i32) {
+        let bucket = n as usize / BITS_PER_BUCKET;
         if bucket < self.num_buckets() {
-            let pos = n % BITS_PER_BUCKET;
+            let pos = n as usize % BITS_PER_BUCKET;
             self.buckets[bucket] &= !(1 << pos);
         }
     }
 
 
     /// Checks if the integer `n` is in the bitmap.
-    pub fn get(&self, n: usize) -> bool {
-        let bucket = n / BITS_PER_BUCKET;
+    pub fn get(&self, n: i32) -> bool {
+        let bucket = n as usize / BITS_PER_BUCKET;
         if bucket >= self.num_buckets() {
             return false;
         }
-        let pos = n % BITS_PER_BUCKET;
+        let pos = n as usize % BITS_PER_BUCKET;
         return 0 != self.buckets[bucket] & (1 << pos);
     }
 
@@ -151,7 +151,7 @@ impl Bitmap {
 
 
 impl <T> From<T> for Bitmap
-    where T: AsRef<[usize]>
+    where T: AsRef<[i32]>
 {
     fn from(elems: T) -> Bitmap {
         let mut bm = Bitmap::new();
@@ -164,7 +164,7 @@ impl <T> From<T> for Bitmap
 
 
 impl IntoIterator for Bitmap {
-    type Item = usize;
+    type Item = i32;
     type IntoIter = BitmapIterator;
     fn into_iter(self) -> Self::IntoIter {
         return BitmapIterator { offset: 0, bitmap: self };
@@ -179,7 +179,7 @@ pub struct BitmapIterator {
 
 
 impl Iterator for BitmapIterator {
-    type Item = usize;
+    type Item = i32;
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
@@ -203,7 +203,7 @@ impl Iterator for BitmapIterator {
 
             let x = self.offset;
             self.offset += 1;
-            return Some(x);
+            return Some(x as i32);
         }
     }
 }

@@ -1,7 +1,7 @@
 extern crate roaring;
 
 use std::io;
-use std::time::{Instant, Duration};
+use std::time::Instant;
 
 use roaring::bitmap::Bitmap;
 
@@ -12,7 +12,7 @@ fn main() {
     let mut buf = String::new();
     let stdin = io::stdin();
     while stdin.read_line(&mut buf).unwrap() > 0 {
-        let n = buf.trim().parse::<usize>().unwrap();
+        let n = buf.trim().parse::<i32>().unwrap();
         bm.set(n);
         buf.clear();
     }
