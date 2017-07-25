@@ -207,20 +207,3 @@ impl Iterator for BitmapIterator {
         }
     }
 }
-
-
-#[test]
-fn test_compact() {
-    let mut bm = Bitmap::new();
-    assert_eq!(4, bm.num_buckets());
-    bm.compact();
-    assert_eq!(0, bm.num_buckets());
-    bm.set(0);
-    bm.set(128);
-    assert_eq!(3, bm.num_buckets());
-    bm.compact();
-    assert_eq!(3, bm.num_buckets());
-    bm.unset(128);
-    bm.compact();
-    assert_eq!(1, bm.num_buckets());
-}

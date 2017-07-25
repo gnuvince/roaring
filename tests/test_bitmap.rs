@@ -119,3 +119,20 @@ fn test_iter() {
     assert_eq!(None, bm_iter.next());
     assert_eq!(None, bm_iter.next());
 }
+
+
+#[test]
+fn test_compact() {
+    let mut bm = Bitmap::new();
+    assert_eq!(4, bm.num_buckets());
+    bm.compact();
+    assert_eq!(0, bm.num_buckets());
+    bm.set(0);
+    bm.set(128);
+    assert_eq!(3, bm.num_buckets());
+    bm.compact();
+    assert_eq!(3, bm.num_buckets());
+    bm.unset(128);
+    bm.compact();
+    assert_eq!(1, bm.num_buckets());
+}
