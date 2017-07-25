@@ -97,19 +97,15 @@ impl ArraySet {
 
     pub fn difference(&self, other: &ArraySet) -> ArraySet {
         let mut diff = ArraySet::new();
-        let mut i = 0;
         let mut j = 0;
-        while i < self.elements.len() && j < other.elements.len() {
-            if other.elements[j] < self.elements[i] {
+        for x in self.elements.iter() {
+            while j < other.elements.len() && other.elements[j] < *x {
                 j += 1;
-            } else {
-                if other.elements[j] > self.elements[i] {
-                    diff.elements.push(self.elements[i]);
-                }
-                i += 1;
+            }
+            if j >= other.elements.len() || *x < other.elements[j] {
+                diff.elements.push(*x);
             }
         }
-        diff.elements.extend(&self.elements[i..]);
         return diff;
     }
 
