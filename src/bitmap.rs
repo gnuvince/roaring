@@ -20,6 +20,7 @@ const BITS_PER_BUCKET: usize = 64;
 #[derive(Debug, Clone)]
 pub struct Bitmap {
     buckets: Vec<u64>,
+    cardinality: usize,
 }
 
 
@@ -33,34 +34,41 @@ impl Bitmap {
     /// Creates a new bitmap with the given number
     /// of buckets; one bucket holds 64 integers.
     pub fn with_capacity(num_buckets: usize) -> Bitmap {
-        return Bitmap { buckets: vec![0; num_buckets] };
+        return Bitmap {
+            buckets: vec![0; num_buckets],
+            cardinality: 0
+        };
     }
 
 
     /// Adds the integer `n` to the bitmap.
-    pub fn set(&mut self, n: i32) {
+    pub fn set(&mut self, n: u16) {
         let bucket = n as usize / BITS_PER_BUCKET;
         let num = self.num_buckets();
         if bucket >= num {
             self.buckets.extend(&vec![0; bucket - num + 1]);
         }
         let pos = n as usize % BITS_PER_BUCKET;
+        // Add 1 to cardinality if bit isn't set.
+        self.cardinality += 1 - ((self.buckets[bucket] >> pos) & 1) as usize;
         self.buckets[bucket] |= 1 << pos;
     }
 
 
     /// Removes the integer `n` from the bitmap.
-    pub fn unset(&mut self, n: i32) {
+    pub fn unset(&mut self, n: u16) {
         let bucket = n as usize / BITS_PER_BUCKET;
         if bucket < self.num_buckets() {
             let pos = n as usize % BITS_PER_BUCKET;
+            // Subtract 1 from cardinality if bit is set.
+            self.cardinality -= ((self.buckets[bucket] >> pos) & 1) as usize;
             self.buckets[bucket] &= !(1 << pos);
         }
     }
 
 
     /// Checks if the integer `n` is in the bitmap.
-    pub fn get(&self, n: i32) -> bool {
+    pub fn get(&self, n: u16) -> bool {
         let bucket = n as usize / BITS_PER_BUCKET;
         if bucket >= self.num_buckets() {
             return false;
@@ -79,6 +87,7 @@ impl Bitmap {
             if i < n1 { *b |= self.buckets[i]; }
             if i < n2 { *b |= other.buckets[i]; }
         }
+        union_bm.cardinality = union_bm.count();
         return union_bm;
     }
 
@@ -91,6 +100,7 @@ impl Bitmap {
         for (i, b) in inter_bm.buckets.iter_mut().enumerate() {
             *b = self.buckets[i] & other.buckets[i];
         }
+        inter_bm.cardinality = inter_bm.count();
         return inter_bm;
     }
 
@@ -105,6 +115,7 @@ impl Bitmap {
         for (i, b) in (0 .. n).zip(diff_bm.buckets.iter_mut()) {
             *b &= !other.buckets[i];
         }
+        diff_bm.cardinality = diff_bm.count();
         return diff_bm;
     }
 
@@ -117,15 +128,23 @@ impl Bitmap {
         for b in compl_bm.buckets.iter_mut() {
             *b = !*b;
         }
+        compl_bm.cardinality =
+            (compl_bm.num_buckets() * BITS_PER_BUCKET) - self.cardinality;
         return compl_bm;
     }
 
 
     /// Returns the number of integers in the bitmap.
-    pub fn count(&self) -> usize {
+    fn count(&self) -> usize {
         return self.buckets.iter()
             .map(|x| x.count_ones() as usize)
             .sum();
+    }
+
+
+    /// Returns the cardinality of the bitmap.
+    pub fn cardinality(&self) -> usize {
+        return self.cardinality;
     }
 
 
@@ -151,7 +170,7 @@ impl Bitmap {
 
 
 impl <T> From<T> for Bitmap
-    where T: AsRef<[i32]>
+    where T: AsRef<[u16]>
 {
     fn from(elems: T) -> Bitmap {
         let mut bm = Bitmap::new();
@@ -164,7 +183,7 @@ impl <T> From<T> for Bitmap
 
 
 impl IntoIterator for Bitmap {
-    type Item = i32;
+    type Item = u16;
     type IntoIter = BitmapIterator;
     fn into_iter(self) -> Self::IntoIter {
         return BitmapIterator { offset: 0, bitmap: self };
@@ -179,7 +198,7 @@ pub struct BitmapIterator {
 
 
 impl Iterator for BitmapIterator {
-    type Item = i32;
+    type Item = u16;
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
@@ -203,7 +222,7 @@ impl Iterator for BitmapIterator {
 
             let x = self.offset;
             self.offset += 1;
-            return Some(x as i32);
+            return Some(x as u16);
         }
     }
 }
