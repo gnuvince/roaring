@@ -50,14 +50,8 @@ impl ArraySet {
             }
         }
 
-        for x in &self.elements[i .. ] {
-            union.elements.push(*x);
-        }
-
-
-        for y in &other.elements[j .. ] {
-            union.elements.push(*y);
-        }
+        union.elements.extend(&self.elements[i..]);
+        union.elements.extend(&other.elements[j..]);
 
         return union;
     }
