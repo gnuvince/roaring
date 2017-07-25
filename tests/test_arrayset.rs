@@ -84,7 +84,24 @@ fn test_complement() {
 }
 
 
+#[test]
+fn test_difference() {
+    let arr1 = ArraySet::from([2, 3, 5, 7]);
+    let arr2 = ArraySet::from([1, 3, 5]);
+    let diff1 = arr1.difference(&arr2);
+    let diff2 = arr2.difference(&arr1);
 
+    assert_eq!(2, diff1.cardinality());
+    assert!(diff1.contains(2));
+    assert!(!diff1.contains(3));
+    assert!(!diff1.contains(5));
+    assert!(diff1.contains(7));
+
+    assert_eq!(1, diff2.cardinality());
+    assert!(diff2.contains(1));
+    assert!(!diff2.contains(3));
+    assert!(!diff2.contains(5));
+}
 
 
 #[test]
