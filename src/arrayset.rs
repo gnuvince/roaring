@@ -1,4 +1,7 @@
-const CAPACITY: usize = 4096;
+// Per FSJ: initial capacity is equal to the number
+// of u16 that fit in a cache line (on x86, one  cache
+// line is 64 bytes; 64 bytes divided by 2 bytes is 32).
+const INIT_CAPACITY: usize = 32;
 
 pub struct ArraySet {
     elements: Vec<u16>
@@ -8,7 +11,7 @@ pub struct ArraySet {
 impl ArraySet {
     pub fn new() -> ArraySet {
         return ArraySet {
-            elements: Vec::with_capacity(CAPACITY)
+            elements: Vec::with_capacity(INIT_CAPACITY)
         };
     }
 
