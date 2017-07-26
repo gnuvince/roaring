@@ -5,6 +5,7 @@ const INIT_CAPACITY: usize = 32;
 
 
 /// A set of u16's represented using a vector.
+#[derive(Debug)]
 pub struct ArraySet {
     elements: Vec<u16>
 }
