@@ -3,12 +3,15 @@
 // line is 64 bytes; 64 bytes divided by 2 bytes is 32).
 const INIT_CAPACITY: usize = 32;
 
+
+/// A set of u16's represented using a vector.
 pub struct ArraySet {
     elements: Vec<u16>
 }
 
 
 impl ArraySet {
+    /// Creates a new, empty set.
     pub fn new() -> ArraySet {
         return ArraySet {
             elements: Vec::with_capacity(INIT_CAPACITY)
@@ -16,6 +19,7 @@ impl ArraySet {
     }
 
 
+    /// Adds the integer `x` to the set.
     pub fn add(&mut self, x: u16) {
         let res = self.elements.binary_search(&x);
         match res {
@@ -25,6 +29,7 @@ impl ArraySet {
     }
 
 
+    /// Removes the integer `x` from the set.
     pub fn remove(&mut self, x: u16) {
         let res = self.elements.binary_search(&x);
         match res {
@@ -34,6 +39,7 @@ impl ArraySet {
     }
 
 
+    /// Returns the union of two sets.
     // XXX: Can exceed `CAPACITY`.
     pub fn union(&self, other: &ArraySet) -> ArraySet {
         let mut union = ArraySet::new();
@@ -60,6 +66,7 @@ impl ArraySet {
     }
 
 
+    /// Returns the intersection of two sets.
     pub fn intersection(&self, other: &ArraySet) -> ArraySet {
         let mut inter = ArraySet::new();
         let mut i = 0;
@@ -80,6 +87,7 @@ impl ArraySet {
     }
 
 
+    /// Returns the complement of a set.
     // XXX: Can exceed `CAPACITY`.
     pub fn complement(&self) -> ArraySet {
         let mut compl = ArraySet::new();
@@ -95,6 +103,7 @@ impl ArraySet {
     }
 
 
+    /// Returns the set difference of two sets.
     pub fn difference(&self, other: &ArraySet) -> ArraySet {
         let mut diff = ArraySet::new();
         let mut j = 0;
@@ -110,11 +119,13 @@ impl ArraySet {
     }
 
 
+    /// Checks if the integer `x` is contained in the set.
     pub fn contains(&self, x: u16) -> bool {
         return self.elements.binary_search(&x).is_ok();
     }
 
 
+    /// Returns the number of elements in the set.
     pub fn cardinality(&self) -> usize {
         return self.elements.len();
     }
