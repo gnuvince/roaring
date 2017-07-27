@@ -182,47 +182,75 @@ impl <T> From<T> for Bitmap
 }
 
 
+impl <'a> IntoIterator for &'a Bitmap {
+    type Item = u16;
+    type IntoIter = SharedBitmapIterator<'a>;
+    fn into_iter(self) -> Self::IntoIter {
+        return SharedBitmapIterator { offset: 0, bitmap: &self };
+    }
+}
+
 impl IntoIterator for Bitmap {
     type Item = u16;
-    type IntoIter = BitmapIterator;
+    type IntoIter = OwnedBitmapIterator;
     fn into_iter(self) -> Self::IntoIter {
-        return BitmapIterator { offset: 0, bitmap: self };
+        return OwnedBitmapIterator { offset: 0, bitmap: self };
     }
 }
 
 
-pub struct BitmapIterator {
+pub struct SharedBitmapIterator<'a> {
+    offset: usize,
+    bitmap: &'a Bitmap,
+}
+
+
+pub struct OwnedBitmapIterator {
     offset: usize,
     bitmap: Bitmap,
 }
 
 
-impl Iterator for BitmapIterator {
+impl <'a> Iterator for SharedBitmapIterator<'a> {
     type Item = u16;
 
     fn next(&mut self) -> Option<Self::Item> {
-        loop {
-            let bucket = self.offset / BITS_PER_BUCKET;
-            let bit_pos = self.offset % BITS_PER_BUCKET;
-
-            if bucket >= self.bitmap.num_buckets() {
-                return None;
-            }
-
-            // Optimization: skip whole bucket when its value is zero.
-            if self.bitmap.buckets[bucket] == 0 {
-                self.offset += 64;
-                continue;
-            }
-
-            if self.bitmap.buckets[bucket] & (1 << bit_pos) == 0 {
-                self.offset += 1;
-                continue;
-            }
-
-            let x = self.offset;
-            self.offset += 1;
-            return Some(x as u16);
-        }
+        return next_iter(&mut self.offset, self.bitmap);
     }
+}
+
+impl Iterator for OwnedBitmapIterator {
+    type Item = u16;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        return next_iter(&mut self.offset, &self.bitmap);
+    }
+}
+
+
+fn next_iter(offset: &mut usize, bitmap: &Bitmap) -> Option<u16> {
+    loop {
+        let bucket = *offset / BITS_PER_BUCKET;
+        let bit_pos = *offset % BITS_PER_BUCKET;
+
+        if bucket >= bitmap.num_buckets() {
+            return None;
+        }
+
+        // Optimization: skip whole bucket when its value is zero.
+        if bitmap.buckets[bucket] == 0 {
+            *offset += 64;
+            continue;
+        }
+
+        if bitmap.buckets[bucket] & (1 << bit_pos) == 0 {
+            *offset += 1;
+            continue;
+        }
+
+        let x = *offset;
+        *offset += 1;
+        return Some(x as u16);
+    }
+
 }

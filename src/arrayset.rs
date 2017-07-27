@@ -146,32 +146,56 @@ impl <T> From<T> for ArraySet
 }
 
 
+impl <'a> IntoIterator for &'a ArraySet {
+    type Item = u16;
+    type IntoIter = SharedArraySetIter<'a>;
+    fn into_iter(self) -> Self::IntoIter {
+        return SharedArraySetIter { arr: self, offset: 0 };
+    }
+}
+
 impl IntoIterator for ArraySet {
     type Item = u16;
-    type IntoIter = ArraySetIter;
+    type IntoIter = OwnedArraySetIter;
     fn into_iter(self) -> Self::IntoIter {
-        return ArraySetIter {
-            arr: self,
-            offset: 0
-        };
+        return OwnedArraySetIter { arr: self, offset: 0 };
     }
 }
 
 
-pub struct ArraySetIter {
+pub struct SharedArraySetIter<'a> {
+    arr: &'a ArraySet,
+    offset: usize,
+}
+
+
+pub struct OwnedArraySetIter {
     arr: ArraySet,
     offset: usize,
 }
 
 
-impl Iterator for ArraySetIter {
+impl <'a> Iterator for SharedArraySetIter<'a> {
     type Item = u16;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.offset >= self.arr.elements.len() {
-            return None;
-        }
-        self.offset += 1;
-        return Some(self.arr.elements[self.offset - 1]);
+        return iter_next(&mut self.offset, self.arr);
     }
+}
+
+
+impl Iterator for OwnedArraySetIter {
+    type Item = u16;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        return iter_next(&mut self.offset, &self.arr);
+    }
+}
+
+fn iter_next(offset: &mut usize, arr: &ArraySet) -> Option<u16> {
+    if *offset >= arr.elements.len() {
+        return None;
+    }
+    *offset += 1;
+    return Some(arr.elements[*offset - 1]);
 }
